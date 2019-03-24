@@ -1,4 +1,3 @@
-
 #include <Bridge.h>
 #include <BridgeServer.h>
 #include <BridgeClient.h>
@@ -47,16 +46,34 @@ void setup() {
 
 bool checkForConnection()
 {
-  BridgeClient client = server.accept();
-  if(client)
-  {
-    matrix.fillScreen(0);
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+    bool retVal = true;
+    BridgeClient client = server.accept();
+    if(client)
+    {
+        if(isDroneConnection(client))
+        {
+            retVal = false;
+        }
+    }
+    return retVal;
+}
+
+bool isDroneConnection(BridgeClient client)
+{
+    bool retVal = false;
+    String command = client.readStringUntil('/');
+    command.trim();
+    Serial.println("command: " + command);
+    if (command == "GET") //only allow gets
+    {
+        command = client.readStringUntil('/');
+        Serial.println("command: " + command);
+        if (command == "drone")
+        {
+            retVal = true;
+        }
+    }
+    return retVal;
 }
 
 void loop() {
@@ -78,34 +95,38 @@ void loop() {
 
 void process(BridgeClient client) {
   // read the command
-  Serial.println(F("In process"));
   String command = client.readStringUntil('/');
-  command.trim();
-  Serial.println("command: " + command);
-  if (command == "GET") //only allow gets
-  {
-    command = client.readStringUntil('/');
-    Serial.println("command: " + command);
-    if (command == "drone")
+    command.trim();
+    if (command == "GET") //only allow gets
     {
-      delay(65);
-      String action = client.readStringUntil('/');
-      Serial.println("action: " + action);
-      if (action == "postMessage")
-      {
-        matrix.fillScreen(0);
-        Serial.println("Found new code");
-        String message = client.readStringUntil('/');
-        message.trim();
-        message = message.substring(0, message.length() - 4);
-        message.replace("%20"," ");
-        message.replace("%27","'");
-        Serial.println("Message: " + message);
-        client.stop();
-        displayMessage(message, (0-message.length()*5));
-      }
+        command = client.readStringUntil('/');
+        if (command == "drone")
+        {
+            String action = client.readStringUntil('/');
+              if (action == "postMessage")
+              {
+                matrix.fillScreen(0);
+                String message = client.readStringUntil('/');
+                message.trim();
+                message.replace("%20"," ");
+                message.replace("%27","'");
+                String color = client.readStringUntil('/');
+                color.trim();
+                color = color.substring(0, color.length() - 4);
+                String r = color.substring(0,color.indexOf('-'));
+                color = color.substring(r.length() + 1);
+                String g = color.substring(0,color.indexOf('-'));
+                color = color.substring(g.length() + 1);
+                String b = color;
+                Serial.println(r);
+                Serial.println(g);
+                Serial.println(b);
+                client.stop();
+                matrix.setTextColor(matrix.Color(r.toInt(), g.toInt(), b.toInt()));
+                displayMessage(message, (0-message.length()*5));
+              }
+        }
     }
-  }
 }
 
 void displayMessage(String message, int scrollDist)
@@ -123,4 +144,20 @@ void displayMessage(String message, int scrollDist)
   }
   matrix.fillScreen(0);
   matrix.setCursor(0, 0);
+}
+
+String getValue(String data, char separator, int index)
+{
+    int found = 0;
+    int strIndex[] = { 0, -1 };
+    int maxIndex = data.length() - 1;
+
+    for (int i = 0; i <= maxIndex && found <= index; i++) {
+        if (data.charAt(i) == separator || i == maxIndex) {
+            found++;
+            strIndex[0] = strIndex[1] + 1;
+            strIndex[1] = (i == maxIndex) ? i+1 : i;
+        }
+    }
+    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
