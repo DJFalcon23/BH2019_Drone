@@ -123,6 +123,7 @@ void process(BridgeClient client) {
                 Serial.println(b);
                 client.stop();
                 matrix.setTextColor(matrix.Color(r.toInt(), g.toInt(), b.toInt()));
+                Serial.println(message);
                 displayMessage(message, (0-message.length()*5));
               }
         }

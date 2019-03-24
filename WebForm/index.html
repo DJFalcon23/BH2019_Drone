@@ -59,7 +59,7 @@
                 
                 var requestUrl = "http://192.168.240.1:5555/drone/postMessage/" + $('#droneMessage').val() + "/" + Math.round(color._r) + "-" + Math.round(color._g) + "-" + Math.round(color._b);
                 $.get(requestUrl);
-                $.get(requestUrl);
+                //$.get(requestUrl);
                 $('.alert-success').html("Successfully sent message: " + $('#droneMessage').val()).show();
             });
             $('#speedRange').change(function(){
