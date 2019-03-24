@@ -118,9 +118,6 @@ void process(BridgeClient client) {
                 String g = color.substring(0,color.indexOf('-'));
                 color = color.substring(g.length() + 1);
                 String b = color;
-                Serial.println(r);
-                Serial.println(g);
-                Serial.println(b);
                 client.stop();
                 matrix.setTextColor(matrix.Color(r.toInt(), g.toInt(), b.toInt()));
                 Serial.println(message);
