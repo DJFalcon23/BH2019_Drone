@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="plugins/spectrum/spectrum.css">
+    <title>Crowd Control Drone</title>
+  </head>
+  <body>
+    <h1>Crowd Control Drone</h1>
+
+    <div class="card w-75">
+        <div class="card-header">
+            Send Message
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Send a message to the drone.</h5>
+            <input type="text" class="form-control" placeholder="Message" id="droneMessage"/>
+            <br/>
+            <p class="card-text">Select a color</p>
+            <input type='text' class="form-control" id="picker" />
+            <br/>
+            <p class="card-text">Speed</p>
+            <div class="form-row align-items-center">
+                <div class="form-group col-md-10">
+                        <input type="range" class="custom-range" min="30" max="100" step="5" id="speedRange">
+                </div>
+                <div class="form-group col-md-2">
+                    <input type="text" class="form-control" id="rangeVal"/>
+                </div>
+            </div>
+            
+            <a href="#" class="btn btn-primary ">Send</a>
+            <div class="alert alert-success" role="alert" style="margin-top:10px;display:none;">
+                    Success
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="plugins/spectrum/spectrum.js"></script>  
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#rangeVal').val($('#speedRange').val());
+            $("#picker").spectrum({
+                flat: true,
+                showButtons: false,
+                preferredFormat: "rgb",
+                color: "rgb(255, 0, 0)",
+                palette: [["red", "rgba(0, 255, 0, .5)", "rgb(0, 0, 255)"]]
+            });
+            $('.btn-primary').unbind('click').click(function(){
+                var color = $('#picker').spectrum('get');
+                //alert('R: ' + Math.round(color._r) + ' B: ' + Math.round(color._b) + ' G: ' + Math.round(color._g));
+                
+                var requestUrl = "http://192.168.240.1:55555/drone/postMessage/" + $('#droneMessage').val() + "/" + Math.round(color._r) + "-" + Math.round(color._g) + "-" + Math.round(color._b);
+                $.get(requestUrl).done(function(){$.get(requestUrl).done(function(){
+                    $('.alert-success').html("Successfully sent message: " + $('#droneMessage').val()).show();
+                })});
+            });
+            $('#speedRange').change(function(){
+                $('#rangeVal').val($(this).val());
+            });
+            $('#rangeVal').focusout(function(){
+                $('#speedRange').val($(this).val());
+            });
+        });
+        
+    </script>
+  </body>
+</html>
